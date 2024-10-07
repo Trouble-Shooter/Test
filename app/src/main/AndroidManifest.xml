@@ -26,6 +26,8 @@
         <activity android:name=".HomeActivity"></activity>
         <activity android:name=".MainActivity"></activity>
         <activity android:name=".ProfileActivity"></activity>
+        <activity android:name=".LightActivity"></activity>
     </application>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
 </manifest>
