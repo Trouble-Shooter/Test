@@ -1,0 +1,403 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal">
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="85dp"
+        android:background="@drawable/rounded_corner_top"
+        android:gravity="center"
+        android:orientation="horizontal"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MATTYAS"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="34sp"
+            android:padding="0dp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Main Category Spinner -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="እቃ አይነት"
+            android:textSize="20sp"
+            android:paddingBottom="8dp"/>
+
+        <Spinner
+            android:id="@+id/mainCategorySpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- Oil Type Label -->
+        <TextView
+            android:id="@+id/oilTypeLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ዘይት አይነት"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone"/> <!-- Initially hidden -->
+
+        <!-- Oil Type Spinner -->
+        <TextView
+            android:id="@+id/motorOilTypeLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Motor Oil Type"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" /> <!-- Initially hidden -->
+
+        <Spinner
+            android:id="@+id/oilTypeSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/> <!-- Initially hidden -->
+
+        <!-- Spinner for Motor Oil Exact Name -->
+        <TextView
+            android:id="@+id/motorOilNameLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="የዘይት ስም"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone"/>
+
+        <Spinner
+            android:id="@+id/motorOilNameSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+
+        <!-- Spinner for Liters -->
+        <TextView
+            android:id="@+id/litersLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Liters"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone"/>
+
+        <Spinner
+            android:id="@+id/litersSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+
+        <!-- EditText for Amount -->
+        <TextView
+            android:id="@+id/amountLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ብዛት"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone"/>
+
+        <EditText
+            android:id="@+id/amountEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="ብዛት"
+            android:visibility="gone"/>
+
+        <!-- Brake Oil Options -->
+        <TextView
+            android:id="@+id/brakeOilNameLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ፌሬን ዘይት አይነት:"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" />
+
+        <Spinner
+            android:id="@+id/brakeOilNameSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/brakeLitersLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Liters:"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" />
+
+        <Spinner
+            android:id="@+id/brakeLitersSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/brakeAmountLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ብዛት"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/brakeAmountEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="ብዛት"
+            android:visibility="gone" />
+
+        <!-- hydraulic option-->
+        <TextView
+            android:id="@+id/hydraulicOilNameLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ካቢሆን ዘይት ስም:"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" />
+
+        <Spinner
+            android:id="@+id/hydraulicOilNameSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/hydraulicLitersLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Liters:"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" />
+
+        <Spinner
+            android:id="@+id/hydraulicLitersSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/hydraulicAmountLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ብዛት:"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/hydraulicAmountEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="ብዛት"
+            android:visibility="gone" />
+
+        <!-- Filter Options -->
+        <TextView
+            android:id="@+id/filterNameLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ፊልትሮ ስም:"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" />
+
+        <Spinner
+            android:id="@+id/filterNameSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/filterQualityLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ጥራት:"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" />
+
+        <Spinner
+            android:id="@+id/filterQualitySpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/filterAmountLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ብዛት:"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/filterAmountEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="ብዛት"
+            android:visibility="gone" />
+
+        <!-- Light Options -->
+        <TextView
+            android:id="@+id/lightCarNameLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="መኪና ስም:"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" />
+
+        <Spinner
+            android:id="@+id/lightCarNameSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/lightSideLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ግራ or ቀኝ:"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" />
+
+        <Spinner
+            android:id="@+id/lightSideSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/lightTypeLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="አይነት:"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" />
+
+        <Spinner
+            android:id="@+id/lightTypeSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/lightAmountLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ብዛት:"
+            android:textSize="20sp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/lightAmountEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="ብዛት"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/addButtontofirebase"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add"
+            android:gravity="center"
+            android:textSize="22dp"
+            android:layout_marginLeft="130dp"/>
+
+
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="#1F2340"
+        android:layout_marginTop="-60dp">
+
+        <ImageButton
+            android:id="@+id/homeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="120dp"
+            android:src="@drawable/baseline_home_24"
+            android:layout_marginRight="90dp"
+            android:background="@android:color/transparent"
+            android:importantForAccessibility="no"/>
+
+        <ImageButton
+            android:id="@+id/addButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/baseline_add_circle"
+            android:layout_marginBottom="120dp"
+            android:layout_marginRight="60dp"
+            android:background="@android:color/transparent"
+            android:importantForAccessibility="no"
+            />
+
+        <ImageButton
+            android:id="@+id/profileButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/baseline_person"
+            android:layout_marginBottom="120dp"
+            android:layout_marginRight="0dp"
+            android:background="@android:color/transparent"
+            android:importantForAccessibility="no"/>
+
+    </LinearLayout>
+</LinearLayout>
