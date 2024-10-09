@@ -25,6 +25,13 @@
 
     </LinearLayout>
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:paddingBottom="22dp">
+
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
@@ -107,25 +114,6 @@
             android:layout_height="wrap_content"
             android:visibility="gone"/>
 
-        <!-- EditText for Amount -->
-        <TextView
-            android:id="@+id/amountLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ብዛት"
-            android:textSize="20sp"
-            android:paddingTop="16dp"
-            android:paddingBottom="8dp"
-            android:visibility="gone"/>
-
-        <EditText
-            android:id="@+id/amountEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:hint="ብዛት"
-            android:visibility="gone"/>
-
         <!-- Brake Oil Options -->
         <TextView
             android:id="@+id/brakeOilNameLabel"
@@ -159,23 +147,7 @@
             android:layout_height="wrap_content"
             android:visibility="gone" />
 
-        <TextView
-            android:id="@+id/brakeAmountLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ብዛት"
-            android:textSize="20sp"
-            android:paddingTop="16dp"
-            android:paddingBottom="8dp"
-            android:visibility="gone" />
 
-        <EditText
-            android:id="@+id/brakeAmountEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:hint="ብዛት"
-            android:visibility="gone" />
 
         <!-- hydraulic option-->
         <TextView
@@ -210,23 +182,7 @@
             android:layout_height="wrap_content"
             android:visibility="gone" />
 
-        <TextView
-            android:id="@+id/hydraulicAmountLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ብዛት:"
-            android:textSize="20sp"
-            android:paddingTop="16dp"
-            android:paddingBottom="8dp"
-            android:visibility="gone" />
 
-        <EditText
-            android:id="@+id/hydraulicAmountEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:hint="ብዛት"
-            android:visibility="gone" />
 
         <!-- Filter Options -->
         <TextView
@@ -261,23 +217,7 @@
             android:layout_height="wrap_content"
             android:visibility="gone" />
 
-        <TextView
-            android:id="@+id/filterAmountLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ብዛት:"
-            android:textSize="20sp"
-            android:paddingTop="16dp"
-            android:paddingBottom="8dp"
-            android:visibility="gone" />
 
-        <EditText
-            android:id="@+id/filterAmountEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:hint="ብዛት"
-            android:visibility="gone" />
 
         <!-- Light Options -->
         <TextView
@@ -328,23 +268,54 @@
             android:layout_height="wrap_content"
             android:visibility="gone" />
 
+        <!-- EditText for Amount -->
         <TextView
-            android:id="@+id/lightAmountLabel"
+            android:id="@+id/amountLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ብዛት:"
+            android:text="ብዛት"
             android:textSize="20sp"
             android:paddingTop="16dp"
             android:paddingBottom="8dp"
-            android:visibility="gone" />
-
+            />
         <EditText
-            android:id="@+id/lightAmountEditText"
+            android:id="@+id/amountEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="number"
-            android:hint="ብዛት"
-            android:visibility="gone" />
+            android:hint="ብዛት" />
+        <!-- Product Image -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="እቃ ምስል"
+            android:textSize="20sp"
+            android:paddingBottom="8dp"/>
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+
+            <!-- Camera icon -->
+            <ImageView
+                android:id="@+id/selectImageIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/baseline_photo_camera_24"
+                android:contentDescription="Select image" />
+
+            <!-- No image selected text -->
+            <TextView
+                android:id="@+id/noImageText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No image selected"
+                android:layout_marginStart="8dp"
+                android:textSize="16sp" />
+        </LinearLayout>
 
         <Button
             android:id="@+id/addButtontofirebase"
@@ -353,16 +324,17 @@
             android:text="Add"
             android:gravity="center"
             android:textSize="22dp"
-            android:layout_marginLeft="130dp"/>
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"/>
 
 
     </LinearLayout>
-
+    </ScrollView>
 
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="60dp"
         android:orientation="horizontal"
         android:gravity="center"
         android:background="#1F2340"
@@ -372,7 +344,6 @@
             android:id="@+id/homeButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="120dp"
             android:src="@drawable/baseline_home_24"
             android:layout_marginRight="90dp"
             android:background="@android:color/transparent"
@@ -383,7 +354,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/baseline_add_circle"
-            android:layout_marginBottom="120dp"
+
             android:layout_marginRight="60dp"
             android:background="@android:color/transparent"
             android:importantForAccessibility="no"
@@ -394,7 +365,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/baseline_person"
-            android:layout_marginBottom="120dp"
             android:layout_marginRight="0dp"
             android:background="@android:color/transparent"
             android:importantForAccessibility="no"/>

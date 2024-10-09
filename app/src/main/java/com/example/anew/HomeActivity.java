@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class HomeActivity extends AppCompatActivity {
 
     // Declare the ImageButtons
-    private ImageButton homeButton, addButton, profileButton;
+    private ImageButton homeButton, addButton, profileButton, light;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +21,7 @@ public class HomeActivity extends AppCompatActivity {
         homeButton = findViewById(R.id.homeButton);
         addButton = findViewById(R.id.addButton);
         profileButton = findViewById(R.id.profileButton);
+        light = findViewById(R.id.light);
 
         // Set click listeners for the buttons
         homeButton.setOnClickListener(new View.OnClickListener() {
@@ -36,7 +37,12 @@ public class HomeActivity extends AppCompatActivity {
         });
         //profile button
         profileButton.setOnClickListener(v -> {
-            Intent intent = new Intent(HomeActivity.this, ProfileActivity.class); // Start Sign Up activity
+            Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
+            startActivity(intent);
+        });
+        //light imagebutton
+        light.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, LightActivity.class);
             startActivity(intent);
         });
     }

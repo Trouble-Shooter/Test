@@ -1,7 +1,9 @@
 package com.example.anew;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -9,22 +11,32 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class AddActivity extends AppCompatActivity {
 
+    private static final int PICK_IMAGE_REQUEST = 1;
     private Spinner mainCategorySpinner, oilTypeSpinner, motorOilNameSpinner, litersSpinner;
     private Spinner brakeOilNameSpinner, brakeLitersSpinner; // Added Brake Oil spinners
     private Spinner hydraulicOilNameSpinner, hydraulicLitersSpinner;
@@ -40,6 +52,8 @@ public class AddActivity extends AppCompatActivity {
     private ImageButton homeButton, addButton, profileButton;
     private DatabaseReference myRef;
     private Button addButtontofirebase;
+    private ImageView selectImageIcon;
+    private TextView noImageText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +63,8 @@ public class AddActivity extends AppCompatActivity {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         myRef = database.getReference("products");
 
+        selectImageIcon = findViewById(R.id.selectImageIcon);
+        noImageText = findViewById(R.id.noImageText);
         addButtontofirebase = findViewById(R.id.addButtontofirebase);
         // Initialize the spinners and text views for Oil options
         mainCategorySpinner = findViewById(R.id.mainCategorySpinner);
@@ -60,17 +76,16 @@ public class AddActivity extends AppCompatActivity {
         // Initialize Brake Oil spinners and labels
         brakeOilNameSpinner = findViewById(R.id.brakeOilNameSpinner);
         brakeLitersSpinner = findViewById(R.id.brakeLitersSpinner);
-        brakeAmountEditText = findViewById(R.id.brakeAmountEditText);
+
 
         // Initialize hydraulic Oil spinners and labels
         hydraulicOilNameSpinner = findViewById(R.id.hydraulicOilNameSpinner);
         hydraulicLitersSpinner = findViewById(R.id.hydraulicLitersSpinner);
-        hydraulicAmountEditText = findViewById(R.id.hydraulicAmountEditText);
+
 
         // Initialize Filter spinners and labels
         filterNameSpinner = findViewById(R.id.filterNameSpinner);
         filterQualitySpinner = findViewById(R.id.filterQualitySpinner);
-        filterAmountEditText = findViewById(R.id.filterAmountEditText);
 
         // Initialize Light spinners and labels
         lightCarNameLabel = findViewById(R.id.lightCarNameLabel);
@@ -78,9 +93,9 @@ public class AddActivity extends AppCompatActivity {
         lightSideLabel = findViewById(R.id.lightSideLabel);
         lightSideSpinner = findViewById(R.id.lightSideSpinner);
         lightTypeSpinner = findViewById(R.id.lightTypeSpinner); // Light Type Spinner
-        lightAmountEditText = findViewById(R.id.lightAmountEditText); // Light amount EditText
+
         lightTypeLabel = findViewById(R.id.lightTypeLabel); // Label for Light Type
-        lightAmountLabel = findViewById(R.id.lightAmountLabel); // Label for Light amount
+
 
         oilTypeLabel = findViewById(R.id.oilTypeLabel); // Label for Oil Type Spinner
         motorOilNameLabel = findViewById(R.id.motorOilNameLabel);
@@ -90,17 +105,17 @@ public class AddActivity extends AppCompatActivity {
         // Labels for Brake Oil
         brakeOilNameLabel = findViewById(R.id.brakeOilNameLabel);
         brakeLitersLabel = findViewById(R.id.brakeLitersLabel);
-        brakeAmountLabel = findViewById(R.id.brakeAmountLabel);
+
 
         // Labels for hydraulic Oil
         hydraulicOilNameLabel = findViewById(R.id.hydraulicOilNameLabel);
         hydraulicLitersLabel = findViewById(R.id.hydraulicLitersLabel);
-        hydraulicAmountLabel = findViewById(R.id.hydraulicAmountLabel);
+
 
         // Labels for Filter
         filterNameLabel = findViewById(R.id.filterNameLabel);
         filterQualityLabel = findViewById(R.id.filterQualityLabel);
-        filterAmountLabel = findViewById(R.id.filterAmountLabel);
+
 
         // Initialize the bottom navigation buttons
         homeButton = findViewById(R.id.homeButton);
@@ -174,6 +189,15 @@ public class AddActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+        // Handle image selection
+        selectImageIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(intent, PICK_IMAGE_REQUEST);
+            }
+        });
+
         // Set listeners for bottom navigation buttons
         homeButton.setOnClickListener(v -> {
             Intent intent = new Intent(AddActivity.this, HomeActivity.class);
@@ -189,6 +213,19 @@ public class AddActivity extends AppCompatActivity {
             Intent intent = new Intent(AddActivity.this, ProfileActivity.class);
             startActivity(intent);
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            Uri imageUri = data.getData();
+            // You can now display the selected image or do further processing here
+            if (imageUri != null) {
+                noImageText.setVisibility(View.GONE); // Hide "No image selected" text
+                selectImageIcon.setImageURI(imageUri); // Display the selected image in ImageView
+            }
+        }
     }
 
     // Method to show Oil Type options
@@ -242,8 +279,6 @@ public class AddActivity extends AppCompatActivity {
 
         litersLabel.setVisibility(View.GONE);
         litersSpinner.setVisibility(View.GONE);
-        amountLabel.setVisibility(View.GONE);
-        amountEditText.setVisibility(View.GONE);
     }
 
     // Method to show Brake Oil options
@@ -252,8 +287,7 @@ public class AddActivity extends AppCompatActivity {
         brakeOilNameSpinner.setVisibility(View.VISIBLE);
         brakeLitersLabel.setVisibility(View.VISIBLE);
         brakeLitersSpinner.setVisibility(View.VISIBLE);
-        brakeAmountLabel.setVisibility(View.VISIBLE);
-        brakeAmountEditText.setVisibility(View.VISIBLE);
+
 
         // Populate Brake Oil Name spinner
         String[] brakeOilNames = {"ቶታል", "ኤላ", "ቤስት"};
@@ -274,8 +308,6 @@ public class AddActivity extends AppCompatActivity {
         brakeOilNameSpinner.setVisibility(View.GONE);
         brakeLitersLabel.setVisibility(View.GONE);
         brakeLitersSpinner.setVisibility(View.GONE);
-        brakeAmountLabel.setVisibility(View.GONE);
-        brakeAmountEditText.setVisibility(View.GONE);
     }
 
     // Method to show Hydraulic Oil options
@@ -284,8 +316,7 @@ public class AddActivity extends AppCompatActivity {
         hydraulicOilNameSpinner.setVisibility(View.VISIBLE);
         hydraulicLitersLabel.setVisibility(View.VISIBLE);
         hydraulicLitersSpinner.setVisibility(View.VISIBLE);
-        hydraulicAmountLabel.setVisibility(View.VISIBLE);
-        hydraulicAmountEditText.setVisibility(View.VISIBLE);
+
 
         // Populate Hydraulic Oil Name spinner
         String[] hydraulicOilNames = {"ቶታል", "ሀቫሊን"};
@@ -306,8 +337,6 @@ public class AddActivity extends AppCompatActivity {
         hydraulicOilNameSpinner.setVisibility(View.GONE);
         hydraulicLitersLabel.setVisibility(View.GONE);
         hydraulicLitersSpinner.setVisibility(View.GONE);
-        hydraulicAmountLabel.setVisibility(View.GONE);
-        hydraulicAmountEditText.setVisibility(View.GONE);
     }
 
     // Method to show Filter options
@@ -316,8 +345,7 @@ public class AddActivity extends AppCompatActivity {
         filterNameSpinner.setVisibility(View.VISIBLE);
         filterQualityLabel.setVisibility(View.VISIBLE);
         filterQualitySpinner.setVisibility(View.VISIBLE);
-        filterAmountLabel.setVisibility(View.VISIBLE);
-        filterAmountEditText.setVisibility(View.VISIBLE);
+
 
         // Populate Filter Name spinner
         String[] filterNames = {"30002", "E1", "D2", "41010"};
@@ -338,8 +366,6 @@ public class AddActivity extends AppCompatActivity {
         filterNameSpinner.setVisibility(View.GONE);
         filterQualityLabel.setVisibility(View.GONE);
         filterQualitySpinner.setVisibility(View.GONE);
-        filterAmountLabel.setVisibility(View.GONE);
-        filterAmountEditText.setVisibility(View.GONE);
     }
 
     // Method to show Light options
@@ -350,8 +376,7 @@ public class AddActivity extends AppCompatActivity {
         lightSideSpinner.setVisibility(View.VISIBLE);
         lightTypeLabel.setVisibility(View.VISIBLE);
         lightTypeSpinner.setVisibility(View.VISIBLE);
-        lightAmountLabel.setVisibility(View.VISIBLE);
-        lightAmountEditText.setVisibility(View.VISIBLE);
+
 
 
         // Populate Light Car Name spinner
@@ -379,8 +404,6 @@ public class AddActivity extends AppCompatActivity {
         lightSideSpinner.setVisibility(View.GONE);
         lightTypeLabel.setVisibility(View.GONE);
         lightTypeSpinner.setVisibility(View.GONE);
-        lightAmountLabel.setVisibility(View.GONE);
-        lightAmountEditText.setVisibility(View.GONE);
     }
 
     public class Product {
@@ -391,14 +414,14 @@ public class AddActivity extends AppCompatActivity {
         private String amount;
         private String brakeOilName;
         private String brakeLiters;
-        private String brakeAmount;
+
         private String filterName;
         private String filterQuality;
-        private String filterAmount;
+
         private String lightCarName;
         private String lightSide;
         private String lightType;
-        private String lightAmount;
+
 
         // Empty constructor is needed for Firebase
         public Product() {
@@ -406,9 +429,9 @@ public class AddActivity extends AppCompatActivity {
 
         // Constructor with all parameters
         public Product(String category, String oilType, String oilName, String liters, String amount,
-                       String brakeOilName, String brakeLiters, String brakeAmount,
-                       String filterName, String filterQuality, String filterAmount,
-                       String lightCarName, String lightSide, String lightType, String lightAmount) {
+                       String brakeOilName, String brakeLiters,
+                       String filterName, String filterQuality,
+                       String lightCarName, String lightSide, String lightType) {
             this.category = category;
             this.oilType = oilType;
             this.oilName = oilName;
@@ -416,14 +439,14 @@ public class AddActivity extends AppCompatActivity {
             this.amount = amount;
             this.brakeOilName = brakeOilName;
             this.brakeLiters = brakeLiters;
-            this.brakeAmount = brakeAmount;
+
             this.filterName = filterName;
             this.filterQuality = filterQuality;
-            this.filterAmount = filterAmount;
+
             this.lightCarName = lightCarName;
             this.lightSide = lightSide;
             this.lightType = lightType;
-            this.lightAmount = lightAmount;
+
         }
 
         // New constructor with category, oilType, and amount
@@ -490,13 +513,7 @@ public class AddActivity extends AppCompatActivity {
             this.brakeLiters = brakeLiters;
         }
 
-        public String getBrakeAmount() {
-            return brakeAmount;
-        }
 
-        public void setBrakeAmount(String brakeAmount) {
-            this.brakeAmount = brakeAmount;
-        }
 
         public String getFilterName() {
             return filterName;
@@ -514,13 +531,7 @@ public class AddActivity extends AppCompatActivity {
             this.filterQuality = filterQuality;
         }
 
-        public String getFilterAmount() {
-            return filterAmount;
-        }
 
-        public void setFilterAmount(String filterAmount) {
-            this.filterAmount = filterAmount;
-        }
 
         public String getLightCarName() {
             return lightCarName;
@@ -546,13 +557,7 @@ public class AddActivity extends AppCompatActivity {
             this.lightType = lightType;
         }
 
-        public String getLightAmount() {
-            return lightAmount;
-        }
 
-        public void setLightAmount(String lightAmount) {
-            this.lightAmount = lightAmount;
-        }
     }
 
 
@@ -568,14 +573,14 @@ public class AddActivity extends AppCompatActivity {
         String amount = ""; // Amount in string format for Firebase
         String brakeOilName = ""; // Name for brake oil if applicable
         String brakeLiters = ""; // Quantity for brake oil
-        String brakeAmount = ""; // Amount for brake oil
+
         String filterName = ""; // Filter name if applicable
         String filterQuality = ""; // Quality of the filter
-        String filterAmount = ""; // Amount for filter
+
         String lightCarName = ""; // Car name for lights
         String lightSide = ""; // Side for lights
         String lightType = ""; // Type of lights
-        String lightAmount = ""; // Quantity for lights
+
 
         // Handle oil category
         if (selectedCategory.equals("ዘይት")) {
@@ -586,18 +591,18 @@ public class AddActivity extends AppCompatActivity {
             } else if (oilType.equals("ፌሬን ዘይት") && brakeOilNameSpinner.getSelectedItem() != null) {
                 brakeOilName = brakeOilNameSpinner.getSelectedItem().toString();
                 brakeLiters = litersSpinner.getSelectedItem() != null ? litersSpinner.getSelectedItem().toString() : ""; // Use liters from spinner
-                brakeAmount = brakeAmountEditText.getText().toString(); // Use amount from EditText
+                amount = amountEditText.getText().toString(); // Use amount from EditText
             } else if (oilType.equals("ካቢሆን ዘይት") && hydraulicOilNameSpinner.getSelectedItem() != null) {
                 productName = hydraulicOilNameSpinner.getSelectedItem().toString();
                 liters = litersSpinner.getSelectedItem() != null ? litersSpinner.getSelectedItem().toString() : ""; // Use liters from spinner
-                amount = hydraulicAmountEditText.getText().toString(); // Use amount from EditText
+                amount = amountEditText.getText().toString(); // Use amount from EditText
             }
         }
         // Handle filter category
         else if (selectedCategory.equals("ፊልትሮ") && filterNameSpinner.getSelectedItem() != null) {
             filterName = filterNameSpinner.getSelectedItem().toString();
             filterQuality = filterQualitySpinner.getSelectedItem() != null ? filterQualitySpinner.getSelectedItem().toString() : ""; // Get filter quality
-            filterAmount = filterAmountEditText.getText().toString(); // Use amount from EditText
+            amount = amountEditText.getText().toString(); // Use amount from EditText
         }
         // Handle light category
         else if (selectedCategory.equals("መብራት")
@@ -607,14 +612,14 @@ public class AddActivity extends AppCompatActivity {
             lightCarName = lightCarNameSpinner.getSelectedItem().toString();
             lightSide = lightSideSpinner.getSelectedItem().toString();
             lightType = lightTypeSpinner.getSelectedItem().toString();
-            lightAmount = lightAmountEditText.getText().toString(); // Use amount from EditText
+            amount = amountEditText.getText().toString(); // Use amount from EditText
         }
 
         // Prepare the data to store in Firebase
         Product product = new Product(selectedCategory, oilType, productName, liters, amount,
-                brakeOilName, brakeLiters, brakeAmount,
-                filterName, filterQuality, filterAmount,
-                lightCarName, lightSide, lightType, lightAmount);
+                brakeOilName, brakeLiters,
+                filterName, filterQuality,
+                lightCarName, lightSide, lightType);
 
         // Push product to Firebase
         myRef.push().setValue(product).addOnCompleteListener(task -> {
@@ -646,9 +651,6 @@ public class AddActivity extends AppCompatActivity {
 
         // Clear EditTexts
         amountEditText.setText(""); // Clear amount EditText for oil
-        brakeAmountEditText.setText(""); // Clear brake amount EditText
-        hydraulicAmountEditText.setText(""); // Clear hydraulic amount EditText
-        filterAmountEditText.setText(""); // Clear filter amount EditText
-        lightAmountEditText.setText(""); // Clear light amount EditText
+
     }
 }
