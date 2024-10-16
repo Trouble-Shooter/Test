@@ -29,6 +29,11 @@ public class LightActivity extends AppCompatActivity {
                 // Handle home button click (Optional: if you want it to do something)
             }
         });
+        //Home button
+        homeButton.setOnClickListener(v -> {
+            Intent intent = new Intent(LightActivity.this, HomeActivity.class);
+            startActivity(intent);
+        });
         //add button
         addButton.setOnClickListener(v -> {
             Intent intent = new Intent(LightActivity.this, AddActivity.class);

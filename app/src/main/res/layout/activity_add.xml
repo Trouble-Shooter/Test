@@ -50,7 +50,7 @@
         <Spinner
             android:id="@+id/mainCategorySpinner"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="48dp" />
 
         <!-- Oil Type Label -->
         <TextView
@@ -281,7 +281,7 @@
         <EditText
             android:id="@+id/amountEditText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:inputType="number"
             android:hint="ብዛት" />
         <!-- Product Image -->
@@ -345,7 +345,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/baseline_home_24"
-            android:layout_marginRight="90dp"
+            android:layout_marginRight="100dp"
             android:background="@android:color/transparent"
             android:importantForAccessibility="no"/>
 
@@ -355,7 +355,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/baseline_add_circle"
 
-            android:layout_marginRight="60dp"
+            android:layout_marginRight="100dp"
             android:background="@android:color/transparent"
             android:importantForAccessibility="no"
             />

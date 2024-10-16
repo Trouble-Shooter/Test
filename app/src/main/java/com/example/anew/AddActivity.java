@@ -1,6 +1,9 @@
 package com.example.anew;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -31,8 +34,14 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class AddActivity extends AppCompatActivity {
 
@@ -54,6 +63,11 @@ public class AddActivity extends AppCompatActivity {
     private Button addButtontofirebase;
     private ImageView selectImageIcon;
     private TextView noImageText;
+    private DatabaseReference databaseReference;
+    private StorageReference storageReference;
+    private ActivityResultLauncher<Intent> galleryLauncher;
+    private Uri imageUri;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +76,8 @@ public class AddActivity extends AppCompatActivity {
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         myRef = database.getReference("products");
+        databaseReference = FirebaseDatabase.getInstance().getReference("images");
+        storageReference = FirebaseStorage.getInstance().getReference("uploads");
 
         selectImageIcon = findViewById(R.id.selectImageIcon);
         noImageText = findViewById(R.id.noImageText);
@@ -122,9 +138,37 @@ public class AddActivity extends AppCompatActivity {
         addButton = findViewById(R.id.addButton);
         profileButton = findViewById(R.id.profileButton);
 
-        addButtontofirebase.setOnClickListener(v -> {
-            addButtontofirebase();
+        // Initialize the launcher with a callback to handle the result
+        galleryLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        Uri imageUri = result.getData().getData();
+                        selectImageIcon.setImageURI(imageUri);
+                        uploadImageToFirebase(imageUri);
+                    }
+                }
+        );
+
+        // Set the onClickListener for the selectImageIcon
+        selectImageIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent galleryIntent = new Intent();
+                galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+                galleryIntent.setType("image/*");
+                galleryLauncher.launch(galleryIntent);  // Use the launcher to start the intent
+            }
         });
+
+        addButtontofirebase.setOnClickListener(v -> {
+            if (imageUri != null) {
+                addButtontofirebase(imageUri); // Pass the selected image URI
+            } else {
+                Toast.makeText(this, "Please select an image first.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         // Set up the main category spinner
         String[] mainCategories = {"ዘይት", "ፊልትሮ", "መብራት", "ሌሎች"};
         ArrayAdapter<String> mainCategoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, mainCategories);
@@ -218,15 +262,80 @@ public class AddActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
-            Uri imageUri = data.getData();
-            // You can now display the selected image or do further processing here
-            if (imageUri != null) {
-                noImageText.setVisibility(View.GONE); // Hide "No image selected" text
-                selectImageIcon.setImageURI(imageUri); // Display the selected image in ImageView
-            }
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            imageUri = data.getData();  // Store the selected image URI
+            selectImageIcon.setImageURI(imageUri);// Display the selected image
+            Toast.makeText(this, "Image selected successfully.", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private byte[] bitmapToByteArray(Bitmap bitmap) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos); // Compress with quality 100
+        return baos.toByteArray();
+    }
+    private Bitmap resizeImage(Uri imageUri, int width, int height) throws IOException {
+        Bitmap originalBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+        return Bitmap.createScaledBitmap(originalBitmap, width, height, false);
+    }
+
+    // Method to upload the image to Firebase Storage
+    private void uploadImageToFirebase(Uri imageUri) {
+        if (imageUri != null) {
+            try {
+                // Resize the image to 300x300 pixels (adjust as needed)
+                Bitmap resizedBitmap = resizeImage(imageUri, 200, 200);
+                byte[] imageData = bitmapToByteArray(resizedBitmap);
+
+                // Create a reference to Firebase Storage with a unique filename
+                StorageReference fileRef = storageReference.child(System.currentTimeMillis() + ".jpg");
+
+                // Upload the resized image as byte array
+                fileRef.putBytes(imageData).addOnSuccessListener(taskSnapshot -> {
+                    // Get the download URL once the upload is complete
+                    fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        String downloadUrl = uri.toString();
+                        Log.d("AddActivity", "Image uploaded. URL: " + downloadUrl);
+                        saveImageUrlToDatabase(downloadUrl);  // Save URL in Realtime Database
+                        //Toast.makeText(this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
+                    });
+                }).addOnFailureListener(e -> {
+                    Log.e("AddActivity", "Failed to upload image.", e);
+                    Toast.makeText(this, "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Error resizing image", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    // Method to store the image URL in Realtime Database
+    private void saveImageUrlToDatabase(String imageUrl) {
+        // Create a unique ID in the 'products' node
+        String productId = databaseReference.push().getKey();
+
+        // Create a product object with the image URL and other details
+        Product product = new Product();
+        product.setImageUrl(imageUrl);
+
+        // Save the product object in Realtime Database
+        databaseReference.child(productId).setValue(product)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d("AddActivity", "Image URL stored in Realtime Database.");
+                        Toast.makeText(this, "Image URL saved to database.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Log.e("AddActivity", "Failed to store image URL in database.", task.getException());
+                        Toast.makeText(this, "Failed to store image URL.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
 
     // Method to show Oil Type options
     private void showOilTypeOptions() {
@@ -421,6 +530,7 @@ public class AddActivity extends AppCompatActivity {
         private String lightCarName;
         private String lightSide;
         private String lightType;
+        private String imageUrl;
 
 
         // Empty constructor is needed for Firebase
@@ -431,7 +541,7 @@ public class AddActivity extends AppCompatActivity {
         public Product(String category, String oilType, String oilName, String liters, String amount,
                        String brakeOilName, String brakeLiters,
                        String filterName, String filterQuality,
-                       String lightCarName, String lightSide, String lightType) {
+                       String lightCarName, String lightSide, String lightType, String imageUrl) {
             this.category = category;
             this.oilType = oilType;
             this.oilName = oilName;
@@ -447,6 +557,8 @@ public class AddActivity extends AppCompatActivity {
             this.lightSide = lightSide;
             this.lightType = lightType;
 
+            this.imageUrl = imageUrl;
+
         }
 
         // New constructor with category, oilType, and amount
@@ -457,6 +569,13 @@ public class AddActivity extends AppCompatActivity {
         }
 
         // Getters and Setters for all fields
+        public String getImageUrl() {
+            return imageUrl;
+        }
+
+        public void setImageUrl(String imageUrl) {
+            this.imageUrl = imageUrl;
+        }
         public String getCategory() {
             return category;
         }
@@ -562,79 +681,91 @@ public class AddActivity extends AppCompatActivity {
 
 
     // Method to add product details to Firebase
-    private void addButtontofirebase() {
+    private void addButtontofirebase(Uri imageUri) {
+        if (imageUri != null) {
+            // Upload image to Firebase Storage
+            uploadImage(imageUri);
+        } else {
+            // If no image selected, save product details without image URL
+            saveProductToDatabase(null);
+        }
+    }
+
+    // Method to upload image to Firebase Storage
+    private void uploadImage(Uri imageUri) {
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference("product_images")
+                .child(System.currentTimeMillis() + ".jpg");
+
+        storageRef.putFile(imageUri).addOnSuccessListener(taskSnapshot ->
+                storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    String imageUrl = uri.toString();
+                    saveProductToDatabase(imageUrl); // Save product details with the image URL
+                }).addOnFailureListener(e -> {
+                    Log.e("AddActivity", "Failed to get image URL.", e);
+                    Toast.makeText(this, "Failed to get image URL.", Toast.LENGTH_SHORT).show();
+                })
+        ).addOnFailureListener(e -> {
+            Log.e("AddActivity", "Image upload failed.", e);
+            Toast.makeText(this, "Image upload failed.", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    // Method to save product details in Firebase Realtime Database
+    private void saveProductToDatabase(String imageUrl) {
         // Get selected category from mainCategorySpinner
-        String selectedCategory = mainCategorySpinner.getSelectedItem() != null ? mainCategorySpinner.getSelectedItem().toString() : "";
-        String oilType = oilTypeSpinner.getSelectedItem() != null ? oilTypeSpinner.getSelectedItem().toString() : "";
+        String selectedCategory = mainCategorySpinner.getSelectedItem() != null ?
+                mainCategorySpinner.getSelectedItem().toString() : "";
+        String oilType = oilTypeSpinner.getSelectedItem() != null ?
+                oilTypeSpinner.getSelectedItem().toString() : "";
 
         // Initialize other necessary variables
-        String productName = ""; // Based on your selection
-        String liters = ""; // Quantity of liters from spinner
-        String amount = ""; // Amount in string format for Firebase
-        String brakeOilName = ""; // Name for brake oil if applicable
-        String brakeLiters = ""; // Quantity for brake oil
-
-        String filterName = ""; // Filter name if applicable
-        String filterQuality = ""; // Quality of the filter
-
-        String lightCarName = ""; // Car name for lights
-        String lightSide = ""; // Side for lights
-        String lightType = ""; // Type of lights
-
+        String productName = "", liters = "", amount = "", brakeOilName = "", brakeLiters = "";
+        String filterName = "", filterQuality = "", lightCarName = "", lightSide = "", lightType = "";
 
         // Handle oil category
         if (selectedCategory.equals("ዘይት")) {
             if (oilType.equals("ሞተር ዘይት") && motorOilNameSpinner.getSelectedItem() != null) {
                 productName = motorOilNameSpinner.getSelectedItem().toString();
-                liters = litersSpinner.getSelectedItem() != null ? litersSpinner.getSelectedItem().toString() : ""; // Use liters from spinner
-                amount = amountEditText.getText().toString(); // Use amount from EditText
+                liters = litersSpinner.getSelectedItem() != null ? litersSpinner.getSelectedItem().toString() : "";
+                amount = amountEditText.getText().toString();
             } else if (oilType.equals("ፌሬን ዘይት") && brakeOilNameSpinner.getSelectedItem() != null) {
                 brakeOilName = brakeOilNameSpinner.getSelectedItem().toString();
-                brakeLiters = litersSpinner.getSelectedItem() != null ? litersSpinner.getSelectedItem().toString() : ""; // Use liters from spinner
-                amount = amountEditText.getText().toString(); // Use amount from EditText
+                brakeLiters = litersSpinner.getSelectedItem() != null ? litersSpinner.getSelectedItem().toString() : "";
+                amount = amountEditText.getText().toString();
             } else if (oilType.equals("ካቢሆን ዘይት") && hydraulicOilNameSpinner.getSelectedItem() != null) {
                 productName = hydraulicOilNameSpinner.getSelectedItem().toString();
-                liters = litersSpinner.getSelectedItem() != null ? litersSpinner.getSelectedItem().toString() : ""; // Use liters from spinner
-                amount = amountEditText.getText().toString(); // Use amount from EditText
+                liters = litersSpinner.getSelectedItem() != null ? litersSpinner.getSelectedItem().toString() : "";
+                amount = amountEditText.getText().toString();
             }
-        }
-        // Handle filter category
-        else if (selectedCategory.equals("ፊልትሮ") && filterNameSpinner.getSelectedItem() != null) {
+        } else if (selectedCategory.equals("ፊልትሮ") && filterNameSpinner.getSelectedItem() != null) {
             filterName = filterNameSpinner.getSelectedItem().toString();
-            filterQuality = filterQualitySpinner.getSelectedItem() != null ? filterQualitySpinner.getSelectedItem().toString() : ""; // Get filter quality
-            amount = amountEditText.getText().toString(); // Use amount from EditText
-        }
-        // Handle light category
-        else if (selectedCategory.equals("መብራት")
-                && lightCarNameSpinner.getSelectedItem() != null
-                && lightSideSpinner.getSelectedItem() != null
-                && lightTypeSpinner.getSelectedItem() != null) {
+            filterQuality = filterQualitySpinner.getSelectedItem() != null ? filterQualitySpinner.getSelectedItem().toString() : "";
+            amount = amountEditText.getText().toString();
+        } else if (selectedCategory.equals("መብራት") && lightCarNameSpinner.getSelectedItem() != null
+                && lightSideSpinner.getSelectedItem() != null && lightTypeSpinner.getSelectedItem() != null) {
             lightCarName = lightCarNameSpinner.getSelectedItem().toString();
             lightSide = lightSideSpinner.getSelectedItem().toString();
             lightType = lightTypeSpinner.getSelectedItem().toString();
-            amount = amountEditText.getText().toString(); // Use amount from EditText
+            amount = amountEditText.getText().toString();
         }
 
-        // Prepare the data to store in Firebase
+        // Create a product object with the collected data
         Product product = new Product(selectedCategory, oilType, productName, liters, amount,
-                brakeOilName, brakeLiters,
-                filterName, filterQuality,
-                lightCarName, lightSide, lightType);
+                brakeOilName, brakeLiters, filterName, filterQuality, lightCarName, lightSide, lightType, imageUrl);
 
-        // Push product to Firebase
+        // Save the product data to Firebase Realtime Database
         myRef.push().setValue(product).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Log.d("AddActivity", "Product added successfully.");
-                // Show toast message after successful insertion
-                Toast.makeText(getApplicationContext(), "Product added successfully.", Toast.LENGTH_SHORT).show();
-                clearInputs(); // Call the method to clear inputs
+                Toast.makeText(this, "Product added successfully.", Toast.LENGTH_SHORT).show();
+                clearInputs(); // Clear inputs after saving
             } else {
                 Log.e("AddActivity", "Failed to add product.", task.getException());
-                // Show toast message for failure
-                Toast.makeText(getApplicationContext(), "Failed to add product.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Failed to add product.", Toast.LENGTH_SHORT).show();
             }
         });
     }
+
 
     // Method to clear all input fields and spinners
     private void clearInputs() {
@@ -651,6 +782,7 @@ public class AddActivity extends AppCompatActivity {
 
         // Clear EditTexts
         amountEditText.setText(""); // Clear amount EditText for oil
+        selectImageIcon.setImageDrawable(null);
 
     }
 }
